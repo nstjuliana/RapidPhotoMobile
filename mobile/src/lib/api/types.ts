@@ -78,6 +78,12 @@ export interface PhotoDto {
   tags: string[];
   status: string;
   downloadUrl: string;
+  // Additional properties used in components
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  fileSize?: number;
+  width?: number;
+  height?: number;
 }
 
 export interface ListPhotosParams {

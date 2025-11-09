@@ -75,8 +75,9 @@ async function validateAndRefreshToken(token: string): Promise<string | null> {
 
 // ===== REQUEST INTERCEPTOR =====
 
+// Request interceptor for authentication
 apiClient.interceptors.request.use(
-  async (config: AxiosRequestConfig): Promise<AxiosRequestConfig> => {
+  async (config) => {
     // Skip authentication for public endpoints
     if (config.url && isPublicEndpoint(config.url)) {
       return config;
@@ -103,7 +104,7 @@ apiClient.interceptors.request.use(
 
     return config;
   },
-  (error: AxiosError) => {
+  (error) => {
     return Promise.reject(error);
   }
 );

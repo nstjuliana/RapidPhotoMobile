@@ -15,7 +15,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rapidphotoupload.mobile"
+      "bundleIdentifier": "com.rapidphotoupload.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "We need access to your camera to take photos for upload.",
+        "NSPhotoLibraryUsageDescription": "We need access to your photo library to select and upload photos."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +28,12 @@
       },
       "package": "com.rapidphotoupload.mobile",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

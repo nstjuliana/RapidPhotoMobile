@@ -123,41 +123,49 @@ export async function getUploadStatus(photoId: string): Promise<UploadStatusDto>
  * Upload file directly to S3 using presigned URL with progress tracking
  */
 export async function uploadToS3(
-  file: any, // File or blob-like object
+  fileUri: any, // File URI string from React Native
   presignedUrl: string,
   onProgress?: UploadProgressCallback
 ): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Fetch the file as a blob from the local URI
+      const response = await fetch(fileUri);
+      const blob = await response.blob();
 
-    // Progress tracking
-    if (onProgress) {
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const progress = Math.round((event.loaded / event.total) * 100);
-          onProgress(progress);
+      const xhr = new XMLHttpRequest();
+
+      // Progress tracking
+      if (onProgress) {
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            onProgress(progress);
+          }
+        };
+      }
+
+      // Success handler
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`S3 upload failed: ${xhr.status}`));
         }
       };
+
+      // Error handler
+      xhr.onerror = () => {
+        reject(new Error('S3 upload failed: Network error'));
+      };
+
+      // Configure and send request
+      xhr.open('PUT', presignedUrl);
+      xhr.setRequestHeader('Content-Type', 'image/jpeg');
+      xhr.send(blob);
+    } catch (error) {
+      reject(new Error(`Failed to prepare file for upload: ${error instanceof Error ? error.message : 'Unknown error'}`));
     }
-
-    // Success handler
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
-      } else {
-        reject(new Error(`S3 upload failed: ${xhr.status}`));
-      }
-    };
-
-    // Error handler
-    xhr.onerror = () => {
-      reject(new Error('S3 upload failed: Network error'));
-    };
-
-    // Configure and send request
-    xhr.open('PUT', presignedUrl);
-    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-    xhr.send(file);
   });
 }
 
