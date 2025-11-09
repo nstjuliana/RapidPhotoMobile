@@ -247,17 +247,6 @@ export default function GalleryScreen() {
         )}
       </View>
 
-      {/* Upload Button */}
-      {!selectionMode && (
-        <View style={styles.uploadButtonContainer}>
-          <Button
-            title="Upload Photos"
-            onPress={() => router.push('/(tabs)/upload')}
-            style={styles.uploadButton}
-          />
-        </View>
-      )}
-
       {/* Error State */}
       {error && (
         <View style={styles.errorContainer}>
