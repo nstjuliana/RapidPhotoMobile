@@ -85,3 +85,4 @@ Ran `npx expo install --fix` which:
 ## Status
 
 ✅ **RESOLVED** - iOS bundling error fixed and verified working.
+

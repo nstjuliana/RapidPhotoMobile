@@ -224,3 +224,4 @@ export async function replacePhotoTags(photoId: string, tags: string[]): Promise
   });
   return response.data;
 }
+

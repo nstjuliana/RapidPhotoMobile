@@ -109,3 +109,4 @@ export interface ApiError {
 export type UploadProgressCallback = (progress: number) => void;
 
 export type PhotoStatus = 'PENDING' | 'UPLOADING' | 'COMPLETED' | 'FAILED';
+
