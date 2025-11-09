@@ -21,6 +21,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ExpoImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Button } from '@/components/common/Button';
 import { PermissionService } from '@/services/permissions/PermissionService';
 
@@ -109,12 +110,19 @@ export function ImagePicker({
    */
   const getFileInfo = async (uri: string): Promise<{ size: number; filename: string }> => {
     try {
-      // Try to get actual file info from the URI
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      // Use FileSystem to get file info for local file URIs
+      const fileInfo = await FileSystem.getInfoAsync(uri);
       
+      if (fileInfo.exists && 'size' in fileInfo) {
+        return {
+          size: fileInfo.size || 1024000, // Use actual size or estimate 1MB
+          filename: `photo_${Date.now()}.jpg`,
+        };
+      }
+      
+      // Fallback if file info is not available
       return {
-        size: blob.size || 1024000, // Use actual size or estimate 1MB
+        size: 1024000, // Estimate 1MB
         filename: `photo_${Date.now()}.jpg`,
       };
     } catch (error) {
