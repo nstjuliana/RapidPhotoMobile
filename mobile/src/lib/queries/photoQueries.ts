@@ -16,6 +16,7 @@ import {
   removePhotoTags,
   replacePhotoTags,
   getPhotoDownloadUrl,
+  deletePhoto,
 } from '@/lib/api/endpoints';
 import { photoKeys } from './keys';
 import type { PhotoDto, ListPhotosParams } from '@/lib/api/types';
@@ -169,6 +170,24 @@ export function useReplacePhotoTags() {
       );
 
       // Invalidate photo lists to refetch with updated data
+      queryClient.invalidateQueries({ queryKey: photoKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Hook for deleting a photo
+ */
+export function useDeletePhoto() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (photoId: string) => deletePhoto(photoId),
+    onSuccess: (_, photoId) => {
+      // Remove the photo from detail cache
+      queryClient.removeQueries({ queryKey: photoKeys.detail(photoId) });
+
+      // Invalidate photo lists to refetch without the deleted photo
       queryClient.invalidateQueries({ queryKey: photoKeys.lists() });
     },
   });

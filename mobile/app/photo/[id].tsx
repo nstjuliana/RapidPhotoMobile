@@ -23,7 +23,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@/components/common/Button';
-import { usePhoto, useAddPhotoTags, useRemovePhotoTags } from '@/lib/queries/photoQueries';
+import { usePhoto, useAddPhotoTags, useRemovePhotoTags, useDeletePhoto } from '@/lib/queries/photoQueries';
 import type { PhotoDto } from '@/lib/api/types';
 
 const { width, height } = Dimensions.get('window');
@@ -43,6 +43,7 @@ export default function PhotoDetailScreen() {
   // Tag mutations
   const addTagsMutation = useAddPhotoTags();
   const removeTagsMutation = useRemovePhotoTags();
+  const deletePhotoMutation = useDeletePhoto();
 
   /**
    * Handle back navigation
@@ -165,6 +166,38 @@ export default function PhotoDetailScreen() {
   const handleShare = useCallback(() => {
     Alert.alert('Share', 'Share functionality coming soon!');
   }, []);
+
+  /**
+   * Handle photo deletion
+   */
+  const handleDelete = useCallback(() => {
+    if (!photo) return;
+
+    Alert.alert(
+      'Delete Photo',
+      'Are you sure you want to delete this photo? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deletePhotoMutation.mutateAsync(photo.id);
+              Alert.alert('Success', 'Photo deleted successfully', [
+                {
+                  text: 'OK',
+                  onPress: () => router.back(),
+                },
+              ]);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete photo. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  }, [photo, deletePhotoMutation, router]);
 
   // Loading state
   if (isLoading) {
@@ -323,6 +356,18 @@ export default function PhotoDetailScreen() {
             onPress={handleShare}
             variant="outline"
             style={styles.actionButton}
+          />
+        </View>
+
+        {/* Delete Button */}
+        <View style={styles.deleteSection}>
+          <Button
+            title="Delete Photo"
+            onPress={handleDelete}
+            loading={deletePhotoMutation.isPending}
+            disabled={deletePhotoMutation.isPending}
+            variant="outline"
+            style={styles.deleteButton}
           />
         </View>
       </ScrollView>
@@ -514,5 +559,13 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     borderColor: '#007AFF',
+  },
+  deleteSection: {
+    padding: 16,
+    paddingTop: 0,
+    paddingBottom: 32,
+  },
+  deleteButton: {
+    borderColor: '#F44336',
   },
 });

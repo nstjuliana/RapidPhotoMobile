@@ -21,7 +21,7 @@ import { Button } from '@/components/common/Button';
 import { PhotoGrid } from '@/components/photo/PhotoGrid';
 import { SkeletonLoader } from '@/components/common/SkeletonLoader';
 import { EmptyState } from '@/components/common/EmptyState';
-import { useInfinitePhotos } from '@/lib/queries/photoQueries';
+import { useInfinitePhotos, useDeletePhoto } from '@/lib/queries/photoQueries';
 import type { PhotoDto } from '@/lib/api/types';
 
 /**
@@ -45,6 +45,9 @@ export default function GalleryScreen() {
   } = useInfinitePhotos({
     pageSize: 20, // Load 20 photos at a time
   });
+
+  // Delete mutation
+  const deletePhotoMutation = useDeletePhoto();
 
   // Flatten infinite query data
   const photos = useMemo(() => {
@@ -120,7 +123,40 @@ export default function GalleryScreen() {
   }, [photos]);
 
   /**
-   * Handle batch actions (placeholder for future implementation)
+   * Handle batch delete
+   */
+  const handleBatchDelete = useCallback(() => {
+    if (selectedPhotoIds.size === 0) return;
+
+    Alert.alert(
+      'Delete Photos',
+      `Are you sure you want to delete ${selectedPhotoIds.size} photo${selectedPhotoIds.size !== 1 ? 's' : ''}? This action cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const photoIdsArray = Array.from(selectedPhotoIds);
+              await Promise.all(
+                photoIdsArray.map(photoId => deletePhotoMutation.mutateAsync(photoId))
+              );
+              
+              Alert.alert('Success', `${selectedPhotoIds.size} photo${selectedPhotoIds.size !== 1 ? 's' : ''} deleted successfully`);
+              setSelectedPhotoIds(new Set());
+              setSelectionMode(false);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete some photos. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  }, [selectedPhotoIds, deletePhotoMutation]);
+
+  /**
+   * Handle batch actions
    */
   const handleBatchAction = useCallback(() => {
     if (selectedPhotoIds.size === 0) return;
@@ -129,12 +165,13 @@ export default function GalleryScreen() {
       'Batch Actions',
       `Selected ${selectedPhotoIds.size} photo${selectedPhotoIds.size !== 1 ? 's' : ''}`,
       [
+        { text: 'Delete', style: 'destructive', onPress: handleBatchDelete },
         { text: 'Download', onPress: () => Alert.alert('Download', 'Batch download coming soon!') },
         { text: 'Add Tags', onPress: () => Alert.alert('Tags', 'Batch tagging coming soon!') },
         { text: 'Cancel', style: 'cancel' },
       ]
     );
-  }, [selectedPhotoIds]);
+  }, [selectedPhotoIds, handleBatchDelete]);
 
   return (
     <SafeAreaView style={styles.container}>
