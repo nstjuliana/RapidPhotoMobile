@@ -16,9 +16,12 @@ import {
   ListRenderItem,
   ActivityIndicator,
   RefreshControl,
+  Dimensions,
 } from 'react-native';
 import { PhotoCard } from './PhotoCard';
 import type { PhotoDto } from '@/lib/api/types';
+
+const GAP = 8;
 
 /**
  * Props for PhotoGrid component
@@ -71,11 +74,16 @@ export const PhotoGrid = memo<PhotoGridProps>(({
   const keyExtractor = useCallback((item: PhotoDto) => item.id, []);
 
   const getItemLayout = useCallback((data: ArrayLike<PhotoDto> | null | undefined, index: number) => {
-    const itemWidth = (Dimensions.get('window').width - 48) / numColumns;
+    const screenWidth = Dimensions.get('window').width;
+    const horizontalGap = GAP;
+    const verticalGap = 8; // marginBottom from columnWrapper
+    const totalGaps = (numColumns - 1) * horizontalGap;
+    const itemWidth = (screenWidth - totalGaps) / numColumns;
     const itemHeight = itemWidth + 40; // Thumbnail + metadata
+    const rowHeight = itemHeight + verticalGap;
     return {
       length: itemHeight,
-      offset: itemHeight * Math.floor(index / numColumns),
+      offset: Math.floor(index / numColumns) * rowHeight,
       index,
     };
   }, [numColumns]);
@@ -139,11 +147,11 @@ PhotoGrid.displayName = 'PhotoGrid';
 
 const styles = StyleSheet.create({
   contentContainer: {
-    padding: 16,
+    paddingVertical: 8,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
     marginBottom: 8,
+    marginRight: -GAP, // Compensate for last item's marginRight
   },
   emptyContainer: {
     flex: 1,
@@ -172,6 +180,3 @@ const styles = StyleSheet.create({
     color: '#666',
   },
 });
-
-// Import Dimensions at the top level
-import { Dimensions } from 'react-native';

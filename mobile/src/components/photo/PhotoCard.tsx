@@ -19,7 +19,10 @@ import { PhotoThumbnail } from './PhotoThumbnail';
 import type { PhotoDto } from '@/lib/api/types';
 
 const { width } = Dimensions.get('window');
-const CARD_SIZE = (width - 48) / 3; // 3 columns with padding
+const GAP = 8;
+const NUM_COLUMNS = 3;
+const TOTAL_GAPS = (NUM_COLUMNS - 1) * GAP;
+const CARD_SIZE = (width - TOTAL_GAPS) / NUM_COLUMNS; // 3 columns with gaps
 
 /**
  * Props for PhotoCard component
@@ -133,7 +136,8 @@ PhotoCard.displayName = 'PhotoCard';
 const styles = StyleSheet.create({
   container: {
     width: CARD_SIZE,
-    marginBottom: 8,
+    marginRight: GAP,
+    marginBottom: 0,
     position: 'relative',
   },
   selected: {

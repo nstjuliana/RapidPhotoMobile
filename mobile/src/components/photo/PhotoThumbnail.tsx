@@ -19,7 +19,10 @@ import {
 import type { PhotoDto } from '@/lib/api/types';
 
 const { width } = Dimensions.get('window');
-const THUMBNAIL_SIZE = (width - 48) / 3; // 3 columns with padding
+const GAP = 8;
+const NUM_COLUMNS = 3;
+const TOTAL_GAPS = (NUM_COLUMNS - 1) * GAP;
+const THUMBNAIL_SIZE = (width - TOTAL_GAPS) / NUM_COLUMNS; // 3 columns with gaps
 
 /**
  * Props for PhotoThumbnail component
